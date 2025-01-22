@@ -12,7 +12,7 @@
       "deploy": {
         "name": "deploy",
         "command": "npm run deploy",
-        "runAtStart": false
+        "runAtStart": true
       }
     }
   }
