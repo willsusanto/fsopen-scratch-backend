@@ -17,12 +17,13 @@ const unknownEndpoint = (request, response, next) => {
 }
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5057',
     optionsSuccessStatus: 200
 }
 
 app.use(express.json())
 app.use(cors(corsOptions));
+app.use(express.static("dist"));
 app.use(requestLogger);
 
 let notes = [
