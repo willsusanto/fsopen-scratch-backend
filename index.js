@@ -17,7 +17,7 @@ const unknownEndpoint = (request, response, next) => {
 }
 
 const corsOptions = {
-    origin: 'http://localhost:5057',
+    origin: 'http://localhost:5173',
     optionsSuccessStatus: 200
 }
 
