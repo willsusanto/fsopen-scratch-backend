@@ -6,9 +6,21 @@ const url = process.env.MONGODB_URI;
 mongoose.set("strictQuery", true).connect(url)
 
 const noteSchema = new mongoose.Schema({
-    content: String,
-    important: Boolean
-})
+        content: String,
+        important: Boolean
+    },
+    {
+        toObject: {
+            transform: function (document, returnedObject) {
+                return {
+                    id: document._id,
+                    content: document.content,
+                    important: document.important
+                }
+            }
+        }
+    }
+)
 
 const Note = mongoose.model('Note', noteSchema);
 // const note = new Note({
@@ -22,7 +34,7 @@ const Note = mongoose.model('Note', noteSchema);
 //     mongoose.connection.close();
 // })
 
-Note.find({ content: { $exists: false }}).then(result => {
+Note.find({}).then(result => {
     result.forEach(note => {
         console.log(note);
     })

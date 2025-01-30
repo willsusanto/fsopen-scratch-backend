@@ -6,7 +6,7 @@
   "scripts": {
     "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../fsopen-scratch/scratch && npm run build && @powershell Copy-Item dist -Recurse ../../fsopen-scratch-backend",
     "start": "npm run build:ui && node index.js",
-    "dev": "npm run build:ui && nodemon index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "node index.js"
   },

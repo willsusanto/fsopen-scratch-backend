@@ -1,6 +1,27 @@
+require('dotenv').config();
+
 const express = require ('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const url = process.env.MONGODB_URI;
 const app = express();
+
+mongoose.set("strictQuery", true).connect(url);
+
+const noteSchema = new mongoose.Schema({
+    content: String,
+    important: Boolean
+})
+
+noteSchema.set("toJSON", {
+    transform: function (document, returnedObject) {
+        returnedObject.id = returnedObject._id.toString();
+        delete returnedObject._id;
+        delete returnedObject.__v;
+    }
+})
+
+const Note = mongoose.model('Note', noteSchema);
 
 const requestLogger = (request, response, next) => {
     console.log("Method :",request.method);
@@ -73,7 +94,9 @@ app.get("/api/notes/:id", (request, response) => {
 })
 
 app.get("/api/notes", (request, response) => {
-    response.json(notes);
+    Note.find({}).then(notes => {
+        response.json(notes);
+    })
 })
 
 app.post("/api/notes", (request, response) => {
