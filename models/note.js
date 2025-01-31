@@ -27,4 +27,9 @@ noteSchema.set("toJSON", {
 
 const Note = mongoose.model('Note', noteSchema);
 
-module.exports = Note;
+
+const isValidObjectId = (id) => {
+    return mongoose.Types.ObjectId.isValid(id);
+}
+
+module.exports = { Note, isValidObjectId };

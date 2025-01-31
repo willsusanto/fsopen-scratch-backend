@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const express = require ('express');
 const cors = require('cors');
-const Note = require('./models/note');
+const { Note, isValidObjectId } = require('./models/note');
 const app = express();
 
 const requestLogger = (request, response, next) => {
@@ -47,14 +47,6 @@ let notes = [
     }
 ];
 
-const getNewId = () => {
-    const newId = notes.length > 0 
-        ? Math.max(...notes.map(note => Number(note.id))) + 1
-        : 1;
-
-    return String(newId);
-}
-
 app.get("/", (request, response) => {
     console.log(request);
     response.status(200).send("<h1>Hello world, this is the default route!</h1>");
@@ -62,17 +54,27 @@ app.get("/", (request, response) => {
 
 app.get("/api/notes/:id", (request, response) => {
     const id = request.params.id;
-    const findNote = notes.find(note => note.id === id);
 
-    if (findNote === undefined) {
-        // response.statusMessage = "Testing bro";
-        return response.status(404).json({
-            "messsage": "Resource not found."
+    if (!isValidObjectId(id)) {
+        return response.status(400).json({
+            "messsage": "Invalid id format."
         });
     }
 
-    // Content-Type header auto-set for .json() to application/json
-    response.json(findNote);
+    const findNote = Note.findById(id).exec()
+        .then(result => {
+            if (result === null) {
+                return response.status(404).json({
+                    "messsage": "Resource not found."
+                });
+            }
+
+            response.json(result);
+        })
+        .catch(error => {
+            console.log(error);
+            return response.status(500);
+        });
 })
 
 app.get("/api/notes", (request, response) => {
@@ -96,22 +98,44 @@ app.post("/api/notes", (request, response) => {
         });
     }
 
-    const newNote = {
-        id: getNewId(),
+    const newNote = new Note ({
         content: note.content,
         important: Boolean(note.important) ?? false
-    };
+    });
 
-    notes = [...notes, newNote];
-
-    response.status(201).json(newNote);
+    newNote.save()
+        .then(result => {
+            response.status(201).json(newNote);
+        })
+        .catch(error => {
+            console.error("ERROR: Failed to save! ", error);
+            response.status(500);
+        })
 })
 
 app.delete("/api/notes/:id", (request, response) => {
     const id = request.params.id;
-    notes = notes.filter(note => note.id !== id);
 
-    response.status(204).end();
+    if (!isValidObjectId(id)) {
+        return response.status(400).json({
+            "messsage": "Invalid id format."
+        });
+    }
+
+    const findNoteAndDelete = Note.findByIdAndDelete(id).exec()
+        .then(result => {
+            if (result === null) {
+                return response.status(404).json({
+                    "messsage": "Resource not found."
+                });
+            }
+
+            response.status(204).end();
+        })
+        .catch(error => {
+            console.log(error);
+            return response.status(500);
+        });
 })
 
 app.use(unknownEndpoint);
