@@ -29,24 +29,6 @@ app.use(cors(corsOptions));
 app.use(express.static("dist"));
 app.use(requestLogger);
 
-let notes = [
-    {
-        id: "1",
-        content: "HTML is easy, right?",
-        important: true
-    },
-    {
-        id: "2",
-        content: "Browser can execute only JavaScript",
-        important: false
-    },
-    {
-        id: "3",
-        content: "GET and POST are the most important methods of HTTP protocol",
-        important: true
-    }
-];
-
 app.get("/", (request, response) => {
     console.log(request);
     response.status(200).send("<h1>Hello world, this is the default route!</h1>");
