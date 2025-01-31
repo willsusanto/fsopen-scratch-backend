@@ -87,14 +87,24 @@ app.post("/api/notes", (request, response) => {
         })
 })
 
-app.delete("/api/notes/:id", (request, response) => {
+app.put("/api/notes/:id", (request, response, next) => {
     const id = request.params.id;
+    const body = request.body;
 
-    if (!isValidObjectId(id)) {
-        return response.status(400).json({
-            "messsage": "Invalid id format."
-        });
-    }
+    const updatedNote = {
+        content: body.content,
+        important: body.important
+    };
+
+    Note.findByIdAndUpdate(id, updatedNote, { new: true }).exec()
+        .then(result => {
+            response.json(result);
+        })
+        .catch(error => next(error));
+})
+
+app.delete("/api/notes/:id", (request, response, next) => {
+    const id = request.params.id;
 
     const findNoteAndDelete = Note.findByIdAndDelete(id).exec()
         .then(result => {
@@ -106,10 +116,7 @@ app.delete("/api/notes/:id", (request, response) => {
 
             response.status(204).end();
         })
-        .catch(error => {
-            console.log(error);
-            return response.status(500);
-        });
+        .catch(error => next(error));
 })
 
 const unknownEndpoint = (request, response, next) => {
