@@ -2,26 +2,8 @@ require('dotenv').config();
 
 const express = require ('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-const url = process.env.MONGODB_URI;
+const Note = require('./models/note');
 const app = express();
-
-mongoose.set("strictQuery", true).connect(url);
-
-const noteSchema = new mongoose.Schema({
-    content: String,
-    important: Boolean
-})
-
-noteSchema.set("toJSON", {
-    transform: function (document, returnedObject) {
-        returnedObject.id = returnedObject._id.toString();
-        delete returnedObject._id;
-        delete returnedObject.__v;
-    }
-})
-
-const Note = mongoose.model('Note', noteSchema);
 
 const requestLogger = (request, response, next) => {
     console.log("Method :",request.method);
@@ -134,7 +116,7 @@ app.delete("/api/notes/:id", (request, response) => {
 
 app.use(unknownEndpoint);
 
-const port = process.env.PORT || 5057;
+const port = process.env.PORT;
 app.listen(port, () => {
     console.log(`Server running on port: ${port}`)
 });
