@@ -19,6 +19,23 @@ const unknownEndpoint = (request, response, next) => {
     next();
 }
 
+const errorHandler = (error, request, response, next) => {
+    console.error("Error handler 1: ", error.message);
+
+    // if (error.name === "CastError") {
+    //     return response.status(400).json({
+    //         message: "Invalid id format."
+    //     });
+    // }
+
+    next(error);
+}
+
+const errorHandler2 = (error, request, response, next) => {
+    console.error("Error handler nomor 2: ", error.message);
+    return response.end();
+}
+
 const corsOptions = {
     origin: 'http://localhost:5173',
     optionsSuccessStatus: 200
@@ -34,14 +51,15 @@ app.get("/", (request, response) => {
     response.status(200).send("<h1>Hello world, this is the default route!</h1>");
 })
 
-app.get("/api/notes/:id", (request, response) => {
+
+app.get("/api/notes/:id", (request, response, next) => {
     const id = request.params.id;
 
-    if (!isValidObjectId(id)) {
-        return response.status(400).json({
-            "messsage": "Invalid id format."
-        });
-    }
+    // if (!isValidObjectId(id)) {
+    //     return response.status(400).json({
+    //         "messsage": "Invalid id format."
+    //     });
+    // }
 
     const findNote = Note.findById(id).exec()
         .then(result => {
@@ -53,11 +71,8 @@ app.get("/api/notes/:id", (request, response) => {
 
             response.json(result);
         })
-        .catch(error => {
-            console.log(error);
-            return response.status(500);
-        });
-})
+        .catch(error => next(error));
+});
 
 app.get("/api/notes", (request, response) => {
     Note.find({}).then(notes => {
@@ -121,6 +136,8 @@ app.delete("/api/notes/:id", (request, response) => {
 })
 
 app.use(unknownEndpoint);
+app.use(errorHandler);
+app.use(errorHandler2);
 
 const port = process.env.PORT;
 app.listen(port, () => {
