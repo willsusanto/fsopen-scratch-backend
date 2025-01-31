@@ -5,6 +5,15 @@ const cors = require('cors');
 const { Note, isValidObjectId } = require('./models/note');
 const app = express();
 
+app.use(express.static("dist"));
+app.use(express.json())
+
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    optionsSuccessStatus: 200
+}
+app.use(cors(corsOptions));
+
 const requestLogger = (request, response, next) => {
     console.log("Method :",request.method);
     console.log("Body :", request.body);
@@ -13,44 +22,12 @@ const requestLogger = (request, response, next) => {
 
     next();
 }
-
-const unknownEndpoint = (request, response, next) => {
-    response.status(404).send({ error: "Unknown endpoint." });
-    next();
-}
-
-const errorHandler = (error, request, response, next) => {
-    console.error("Error handler 1: ", error.message);
-
-    // if (error.name === "CastError") {
-    //     return response.status(400).json({
-    //         message: "Invalid id format."
-    //     });
-    // }
-
-    next(error);
-}
-
-const errorHandler2 = (error, request, response, next) => {
-    console.error("Error handler nomor 2: ", error.message);
-    return response.end();
-}
-
-const corsOptions = {
-    origin: 'http://localhost:5173',
-    optionsSuccessStatus: 200
-}
-
-app.use(express.json())
-app.use(cors(corsOptions));
-app.use(express.static("dist"));
 app.use(requestLogger);
 
 app.get("/", (request, response) => {
     console.log(request);
     response.status(200).send("<h1>Hello world, this is the default route!</h1>");
 })
-
 
 app.get("/api/notes/:id", (request, response, next) => {
     const id = request.params.id;
@@ -135,9 +112,24 @@ app.delete("/api/notes/:id", (request, response) => {
         });
 })
 
+const unknownEndpoint = (request, response, next) => {
+    response.status(404).send({ error: "Unknown endpoint." });
+    next();
+}
 app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+    console.error("ERROR: ", error.message);
+
+    if (error.name === "CastError") {
+        return response.status(400).json({
+            message: "Invalid id format."
+        });
+    }
+
+    next(error);
+}
 app.use(errorHandler);
-app.use(errorHandler2);
 
 const port = process.env.PORT;
 app.listen(port, () => {
