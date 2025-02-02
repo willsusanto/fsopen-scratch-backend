@@ -57,21 +57,9 @@ app.get("/api/notes", (request, response) => {
     })
 })
 
-app.post("/api/notes", (request, response) => {
+app.post("/api/notes", (request, response, next) => {
     const note = request.body;
     
-    if (!note || Object.entries(note).length === 0) {
-        return response.status(400).json({
-            "messsage": "Bad request."
-        });
-    }
-
-    if (note.content == null || note.content.trim() === "") {
-        return response.status(400).json({
-            "messsage": "Content must not be empty."
-        });
-    }
-
     const newNote = new Note ({
         content: note.content,
         important: Boolean(note.important) ?? false
@@ -81,22 +69,16 @@ app.post("/api/notes", (request, response) => {
         .then(result => {
             response.status(201).json(newNote);
         })
-        .catch(error => {
-            console.error("ERROR: Failed to save! ", error);
-            response.status(500);
-        })
+        .catch(error => next(error));
 })
 
 app.put("/api/notes/:id", (request, response, next) => {
     const id = request.params.id;
-    const body = request.body;
+    const { content, important }= request.body;
 
-    const updatedNote = {
-        content: body.content,
-        important: body.important
-    };
-
-    Note.findByIdAndUpdate(id, updatedNote, { new: true }).exec()
+    Note.findByIdAndUpdate(id, 
+            { content, important }, 
+            { new: true, runValidators: true, context: 'query' }).exec()
         .then(result => {
             response.json(result);
         })
@@ -128,10 +110,13 @@ app.use(unknownEndpoint);
 const errorHandler = (error, request, response, next) => {
     console.error("ERROR: ", error.message);
 
-    if (error.name === "CastError") {
-        return response.status(400).json({
-            message: "Invalid id format."
-        });
+    const errorMappings = {
+        'CastError': () => response.status(400).json({ message: "Invalid format." }),
+        'ValidationError': () => response.status(400).json({ message: error.message })
+    }
+
+    if (errorMappings[error.name]) {
+        return errorMappings[error.name]();
     }
 
     next(error);
