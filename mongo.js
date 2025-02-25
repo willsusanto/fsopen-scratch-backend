@@ -1,28 +1,28 @@
-require('dotenv').config();
+require('dotenv').config()
 
-const mongoose = require('mongoose');
-const url = process.env.MONGODB_URI;
+const mongoose = require('mongoose')
+const url = process.env.MONGODB_URI
 
-mongoose.set("strictQuery", true).connect(url)
+mongoose.set('strictQuery', true).connect(url)
 
 const noteSchema = new mongoose.Schema({
-        content: String,
-        important: Boolean
-    },
-    {
-        toObject: {
-            transform: function (document, returnedObject) {
-                return {
-                    id: document._id,
-                    content: document.content,
-                    important: document.important
-                }
-            }
-        }
+  content: String,
+  important: Boolean
+},
+{
+  toObject: {
+    transform: function (document) {
+      return {
+        id: document._id,
+        content: document.content,
+        important: document.important
+      }
     }
+  }
+}
 )
 
-const Note = mongoose.model('Note', noteSchema);
+const Note = mongoose.model('Note', noteSchema)
 // const note = new Note({
 //     content: 'Sebuah dokumen 3',
 //     important: false
@@ -35,8 +35,8 @@ const Note = mongoose.model('Note', noteSchema);
 // })
 
 Note.find({}).then(result => {
-    result.forEach(note => {
-        console.log(note);
-    })
-    mongoose.connection.close();
+  result.forEach(note => {
+    console.log(note)
+  })
+  mongoose.connection.close()
 })

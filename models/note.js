@@ -1,39 +1,39 @@
-const mongoose = require('mongoose');
-mongoose.set("strictQuery", true);
+const mongoose = require('mongoose')
+mongoose.set('strictQuery', true)
 
-const url = process.env.MONGODB_URI;
+const url = process.env.MONGODB_URI
 
-console.log("Connecting to MongoDB at ", url);
+console.log('Connecting to MongoDB at ', url)
 
 mongoose.connect(url)
-    .then(result => {
-        console.log("Connected to MongoDB!");
-    }).catch(error => {
-        console.error("ERROR: Failed to connect!", error);
-    });
+  .then(() => {
+    console.log('Connected to MongoDB!')
+  }).catch(error => {
+    console.error('ERROR: Failed to connect!', error)
+  })
 
 const noteSchema = new mongoose.Schema({
-    content: {
-        type: String,
-        required: true,
-        minLength: 5
-    },
-    important: Boolean
+  content: {
+    type: String,
+    required: true,
+    minLength: 5
+  },
+  important: Boolean
 })
 
-noteSchema.set("toJSON", {
-    transform: function (document, returnedObject) {
-        returnedObject.id = returnedObject._id.toString();
-        delete returnedObject._id;
-        delete returnedObject.__v;
-    }
+noteSchema.set('toJSON', {
+  transform: function (document, returnedObject) {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
 })
 
-const Note = mongoose.model('Note', noteSchema);
+const Note = mongoose.model('Note', noteSchema)
 
 
 const isValidObjectId = (id) => {
-    return mongoose.Types.ObjectId.isValid(id);
+  return mongoose.Types.ObjectId.isValid(id)
 }
 
-module.exports = { Note, isValidObjectId };
+module.exports = { Note, isValidObjectId }
