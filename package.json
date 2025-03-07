@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../fsopen-scratch/scratch && npm run build && @powershell Copy-Item dist -Recurse ../../fsopen-scratch-backend",
-    "start": "npm run build:ui && node index.js",
-    "dev": "nodemon index.js",
-    "test": "node --test",
+    "start": "cross-env NODE_ENV=production npm run build:ui && node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test node --test",
     "deploy": "node index.js",
     "lint": "eslint ."
   },
@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.9.5"
