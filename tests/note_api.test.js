@@ -7,6 +7,8 @@ const app = require('../app')
 
 const api = supertest(app)
 
+/* npm run test -- --test-name-pattern="notes" to execute specific tests */
+
 const initialNotes = [
   {
     content: 'HTML is easy',
